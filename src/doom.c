@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include </usr/include/SDL2/SDL.h>
 
 // 4:3 aspect ratio
@@ -79,7 +80,10 @@ int main(int argc, char *argv[])
     SDL_Event event_queue;
 
     while (!is_window_closed) {
-        // check if there are any events 
+        //for fps purposes
+        Uint64 start = SDL_GetPerformanceCounter(); 
+
+        // check if there are any events (event loop)
         while(SDL_PollEvent(&event_queue) > 0) {
             // switch case statement for any events
             switch(event_queue.type)
@@ -89,6 +93,16 @@ int main(int argc, char *argv[])
                     break;
             }
         }
+
+        // rendering !
+        renderFrame();
+
+        //for fps purposes
+        Uint64 end = SDL_GetPerformanceCounter();
+        float elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
+        //fps cap
+        SDL_Delay(floor(16.666f - elapsedMS));
+
     }
 
 

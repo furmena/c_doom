@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+#include <sys/stat.h>
 #include </usr/include/SDL2/SDL.h>
 
 // 4:3 aspect ratio
@@ -9,6 +11,41 @@
 // prepare a window and renderer for global access and initialization
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
+
+// structs (i just copied and tryed to understand how the code works ill make explation of how i understand in the markdown file once im finished with this project)
+static struct sector
+{
+    float floor_height, ceiling_height; // each sector has a floor and ceiling height so yeah!
+    struct xy 
+    {
+        float x_pos, y_pos;
+    } *vertex; // nested struct inside the sector struct
+    signed char *neighbors; // look man i need to do research abt this before wiriting more commment
+    unsigned vertex_amount; // int tyoe is assumed
+} *sectors = NULL; // ok so i think i kinda got it i defined a sturct (sector) and 
+static unsigned sector_amount = 0;
+
+// again i copied this most of the sector is just gonna be copied from bisqwits vidoe
+static struct player
+{
+    struct xyz { float x, y, z; } player_position, player_velocity;
+    float angle, angle_sin, angle_cos, yaw;
+    unsigned sector; // what secotor im in
+} player;
+
+static void loadMapData() {
+    const char *resource_folder = "../res";
+    // const char *resource_folder = "..\\res" for windows users i think
+    struct stat sb;
+    
+    if ((stat(resource_folder, &sb)) == 0 && S_ISDIR(sb.st_mode))
+    {
+        printf("YIPPE!");
+    } else
+    {
+        perror("Cannot find directory \"..\\res\"; see error: ");
+    }
+}
 
 // initilize SDL with a nice function
 
@@ -61,7 +98,6 @@ void renderFrame() {
     SDL_RenderClear(renderer);
     
     // render stuff
-    printf("000");
 
     // output info
     SDL_RenderPresent(renderer);
@@ -79,13 +115,11 @@ int main(int argc, char *argv[])
 
     int is_window_closed = 1;
     SDL_Event event_queue;
+    SDL_GL_SetSwapInterval(1);
 
-    // tracking fps
-    Uint64 start = 0.0f;
-    Uint64 end = 0.0f;
-
+    
     while (is_window_closed) {
-        start = SDL_GetPerformanceCounter(); 
+        Uint64 start = SDL_GetPerformanceCounter(); 
 
         // check if there are any events (event loop)
         while(SDL_PollEvent(&event_queue) > 0) {
@@ -102,10 +136,13 @@ int main(int argc, char *argv[])
         renderFrame();
 
         //for fps purposes
-        end = SDL_GetPerformanceCounter();
+        Uint64 end = SDL_GetPerformanceCounter();
         float elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
         //fps cap
-        SDL_Delay(floor(16.666f - elapsedMS));
+        if (!floor(16.666f - elapsedMS) < 0.0f)
+        {
+        SDL_Delay((floor(16.666f - elapsedMS)));
+        }
     }
     return 0;
 }

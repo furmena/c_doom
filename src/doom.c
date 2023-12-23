@@ -61,6 +61,7 @@ void renderFrame() {
     SDL_RenderClear(renderer);
     
     // render stuff
+    printf("000");
 
     // output info
     SDL_RenderPresent(renderer);
@@ -76,12 +77,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int is_window_closed = 0;
+    int is_window_closed = 1;
     SDL_Event event_queue;
 
-    while (!is_window_closed) {
-        //for fps purposes
-        Uint64 start = SDL_GetPerformanceCounter(); 
+    // tracking fps
+    Uint64 start = 0.0f;
+    Uint64 end = 0.0f;
+
+    while (is_window_closed) {
+        start = SDL_GetPerformanceCounter(); 
 
         // check if there are any events (event loop)
         while(SDL_PollEvent(&event_queue) > 0) {
@@ -89,7 +93,7 @@ int main(int argc, char *argv[])
             switch(event_queue.type)
             {
                 case SDL_QUIT:
-                    is_window_closed = 1;
+                    is_window_closed = 0;
                     break;
             }
         }
@@ -98,13 +102,10 @@ int main(int argc, char *argv[])
         renderFrame();
 
         //for fps purposes
-        Uint64 end = SDL_GetPerformanceCounter();
+        end = SDL_GetPerformanceCounter();
         float elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
         //fps cap
         SDL_Delay(floor(16.666f - elapsedMS));
-
     }
-
-
     return 0;
 }
